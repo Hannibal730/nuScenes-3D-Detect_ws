@@ -1,0 +1,16 @@
+<launch>
+  <!--
+    type should match the name of your executable in
+    voxelnext_pkg/scripts/, and name must start with a letter.
+  -->
+  <node pkg="voxelnext_pkg"
+        type="center_object_detect.py"
+        name="VoxelNeXt_center_object_detect"
+        output="screen" />
+
+  <node pkg="rviz"
+        type="rviz"
+        name="rviz"
+        output="screen"
+        args="-d $(find voxelnext_pkg)/launch/object_detect.rviz" />
+</launch>
