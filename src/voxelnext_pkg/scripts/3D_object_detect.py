@@ -194,18 +194,25 @@ class VoxelNeXt3DDetect(Node):
         text_markers = MarkerArray()
 
         for i, output in enumerate(output_dicts):
-            for j, (box, label, score) in enumerate(zip(output["pred_boxes"], output["pred_labels"], output["pred_scores"])):
-                label = label.cpu().item()
-                score = score.cpu().item()
+            # Optimization: Move tensors to CPU and convert to NumPy once before iterating
+            # Calling .cpu().item() inside a loop causes severe GPU-CPU synchronization overhead.
+            pred_boxes = output["pred_boxes"].cpu().numpy()
+            pred_labels = output["pred_labels"].cpu().numpy()
+            pred_scores = output["pred_scores"].cpu().numpy()
+
+            for j in range(len(pred_boxes)):
+                box = pred_boxes[j]
+                label = int(pred_labels[j])
+                score = float(pred_scores[j])
 
                 # Extract x, y and z box's informations
-                x_center = box[0].cpu().item()
-                y_center = box[1].cpu().item()
-                z_center = box[2].cpu().item()
-                x_length = box[3].cpu().item()
-                y_length = box[4].cpu().item()
-                z_length = box[5].cpu().item()
-                heading = box[6].cpu().item()
+                x_center = float(box[0])
+                y_center = float(box[1])
+                z_center = float(box[2])
+                x_length = float(box[3])
+                y_length = float(box[4])
+                z_length = float(box[5])
+                heading = float(box[6])
 
                 qz = math.sin(heading / 2.0)
                 qw = math.cos(heading / 2.0)
