@@ -4,7 +4,8 @@ import sys
 import os
 
 # 로그 포맷 설정: 노드 이름([VoxelNeXt_3D_object_detect]) 제거
-os.environ['RCUTILS_CONSOLE_OUTPUT_FORMAT'] = '[{severity}] [{time}]: {message}'
+# os.environ['RCUTILS_CONSOLE_OUTPUT_FORMAT'] = '[{severity}] [{time}]: {message}'
+os.environ['RCUTILS_CONSOLE_OUTPUT_FORMAT'] = '[{severity}]: {message}'
 
 import rclpy
 from rclpy.node import Node
@@ -133,8 +134,8 @@ class VoxelNeXt3DDetect(Node):
         self.get_logger().info("🚀 Now everything is ready. Run the rosbag file or launch the Velodyne LiDAR")
 
     def lidar_callback(self, msg):
-        self.get_logger().info("-" * 60)
-        self.get_logger().info("Receiving LiDAR data...")
+        self.get_logger().info("-" * 23)
+        self.get_logger().info("Receiving LiDAR data.")
 
         try:
             points = pointcloud2_to_numpy(msg)
@@ -153,7 +154,7 @@ class VoxelNeXt3DDetect(Node):
             self.get_logger().error(f"❌ Error during object detection/publishing: {e}")
 
     def detect_objects(self, points, voxelnext_model, lidar_dataset):
-        self.get_logger().info("Processing LiDAR data...")
+        self.get_logger().info("Processing LiDAR data.")
         data_dict = {"points": points}
 
         # Perform point feature encoding
@@ -188,7 +189,7 @@ class VoxelNeXt3DDetect(Node):
         if total_objects == 0:
             self.get_logger().info("🚫 No objects detected")
         else:
-            self.get_logger().info("Publishing detected_3D_Box...")
+            self.get_logger().info("Publishing detected_3D_Box.")
 
         box_markers  = MarkerArray()
         text_markers = MarkerArray()
