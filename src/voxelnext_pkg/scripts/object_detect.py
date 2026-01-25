@@ -9,8 +9,8 @@ import numpy as np
 from sensor_msgs.msg import PointCloud2
 from visualization_msgs.msg import MarkerArray, Marker
 from std_msgs.msg import Header
-import sensor_msgs.point_cloud2 as pc2
-from voxelnext_load import load_voxelnext_model
+from sensor_msgs_py import point_cloud2 as pc2
+from model import load_voxelnext
 import math
 from builtin_interfaces.msg import Duration
 
@@ -52,7 +52,7 @@ class ObjectDetect(Node):
             self.get_logger().error("Configuration or model checkpoint not found.")
             sys.exit(1)
 
-        self.voxelnext_model, self.lidar_dataset = load_voxelnext_model(config_path, model_checkpoint)
+        self.voxelnext_model, self.lidar_dataset = load_voxelnext(config_path, model_checkpoint)
         self.voxelnext_model.eval()
         self.get_logger().info("✅ VoxelNeXt model load completed")
 

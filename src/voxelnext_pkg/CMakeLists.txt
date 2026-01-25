@@ -11,12 +11,13 @@ install(
     scripts/3D_object_detect.py
     scripts/center_object_detect.py
     scripts/object_detect.py
+    scripts/model.py
+
     DESTINATION lib/${PROJECT_NAME}
 )
 
 install(
     FILES
-    voxelnext_load.py
     DESTINATION lib/${PROJECT_NAME}
 )
 

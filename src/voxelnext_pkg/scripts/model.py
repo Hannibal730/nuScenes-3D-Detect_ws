@@ -12,7 +12,7 @@ import os
 # -------------------------
 # Function to load the VoxelNeXt model and create a dataset for live LiDAR processing.
 # -------------------------
-def load_voxelnext_model(config_path, model_checkpoint):
+def load_voxelnext(config_path, model_checkpoint):
     
     # Determine the absolute path for configuration and checkpoint files
     base_dir = os.path.dirname(os.path.abspath(__file__))
