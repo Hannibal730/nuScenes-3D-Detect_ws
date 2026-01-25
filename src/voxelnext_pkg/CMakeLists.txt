@@ -4,6 +4,8 @@ project(voxelnext_pkg)
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 
+ament_python_install_package(pcdet)
+
 install(
     PROGRAMS
     scripts/3D_object_detect.py
@@ -13,8 +15,14 @@ install(
 )
 
 install(
-    DIRECTORY launch
-    DESTINATION share/${PROJECT_NAME}
+    FILES
+    voxelnext_load.py
+    DESTINATION lib/${PROJECT_NAME}
 )
+
+# install(
+#     DIRECTORY launch
+#     DESTINATION share/${PROJECT_NAME}
+# )
 
 ament_package()
