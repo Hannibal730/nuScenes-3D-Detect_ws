@@ -79,7 +79,7 @@ MODEL:
 
         TARGET_ASSIGNER_CONFIG:
             FEATURE_MAP_STRIDE: 8
-            NUM_MAX_OBJS: 500
+            NUM_MAX_OBJS: 100
             GAUSSIAN_OVERLAP: 0.1
             MIN_RADIUS: 2
 
@@ -94,19 +94,19 @@ MODEL:
         POST_PROCESSING:
 
             # SCORE_THRESH: Detections with a score below this threshold will be filtered out.
-            SCORE_THRESH: 0.6
+            SCORE_THRESH: 0.4
 
             # POST_CENTER_LIMIT_RANGE: Defines the 3D spatial limits (min and max coordinates) for the detected object centers.
             POST_CENTER_LIMIT_RANGE: [-61.2, -61.2, -10.0, 61.2, 61.2, 10.0]
 
             # MAX_OBJ_PER_SAMPLE: Maximum number of detected objects allowed per sample after post-processing.
-            MAX_OBJ_PER_SAMPLE: 500
+            MAX_OBJ_PER_SAMPLE: 100
 
             # NMS_CONFIG: Configuration parameters for Non-Maximum Suppression (NMS), which removes redundant detections.
             NMS_CONFIG:
                 NMS_TYPE: nms_gpu
                 NMS_THRESH: 0.05
-                NMS_PRE_MAXSIZE: 1000
+                NMS_PRE_MAXSIZE: 500
                 NMS_POST_MAXSIZE: 83
 
     POST_PROCESSING:

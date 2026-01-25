@@ -196,14 +196,14 @@ class VoxelResBackBone8xVoxelNeXt(nn.Module):
         
         
         # ✅ DEBUGGING
-        print(f"DEBUG - Before adding the batch‑size dimension : {voxel_coords.shape}")
+        # print(f"DEBUG - Before adding the batch‑size dimension : {voxel_coords.shape}")
 
         # ✅ Add Batch Index (just to modify 3dimensonal vextor to 4dimensional vector)
         batch_indices = torch.zeros((voxel_coords.shape[0], 1), dtype=torch.int32, device=voxel_coords.device)
         voxel_coords = torch.cat([batch_indices, voxel_coords], dim=1)  # [num_voxels, 4]
 
         # ✅ DEBUGGING
-        print(f"DEBUG - After adding the batch‑size dimension (value = 0) : {voxel_coords.shape}")
+        # print(f"DEBUG - After adding the batch‑size dimension (value = 0) : {voxel_coords.shape}")
         
         
         

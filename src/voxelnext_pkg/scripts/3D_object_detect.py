@@ -2,6 +2,10 @@
 
 import sys
 import os
+
+# 로그 포맷 설정: 노드 이름([VoxelNeXt_3D_object_detect]) 제거
+os.environ['RCUTILS_CONSOLE_OUTPUT_FORMAT'] = '[{severity}] [{time}]: {message}'
+
 import rclpy
 from rclpy.node import Node
 import torch
@@ -63,9 +67,16 @@ def pointcloud2_to_numpy(msg):
     - Format: [x, y, z, intensity, timestamp]
     - Extracts only points from the region of interest (ROI).
     """
-    points = np.array(
-        list(pc2.read_points(msg, skip_nans=True, field_names=("x", "y", "z", "intensity"))),
-        dtype=np.float32)
+    points = np.array(list(pc2.read_points(msg, skip_nans=True, field_names=("x", "y", "z", "intensity"))))
+
+    if points.size == 0:
+        return np.zeros((0, 5), dtype=np.float32)
+
+    # If the array is structured (has named fields), extract them
+    if points.dtype.names:
+        points = np.column_stack([points['x'], points['y'], points['z'], points['intensity']])
+
+    points = points.astype(np.float32)
     # Add timestamp column (fixed at 0.0 in this case)
     timestamp = np.full((points.shape[0], 1), 0.0, dtype=np.float32)
     points_with_timestamp = np.hstack((points, timestamp))
@@ -122,7 +133,8 @@ class VoxelNeXt3DDetect(Node):
         self.get_logger().info("🚀 Now everything is ready. Run the rosbag file or launch the Velodyne LiDAR")
 
     def lidar_callback(self, msg):
-        self.get_logger().info("📡 Receiving LiDAR data...")
+        self.get_logger().info("-" * 60)
+        self.get_logger().info("Receiving LiDAR data...")
 
         try:
             points = pointcloud2_to_numpy(msg)
@@ -141,7 +153,7 @@ class VoxelNeXt3DDetect(Node):
             self.get_logger().error(f"❌ Error during object detection/publishing: {e}")
 
     def detect_objects(self, points, voxelnext_model, lidar_dataset):
-        self.get_logger().info("📡 Converting LiDAR data...")
+        self.get_logger().info("Processing LiDAR data...")
         data_dict = {"points": points}
 
         # Perform point feature encoding
@@ -167,12 +179,16 @@ class VoxelNeXt3DDetect(Node):
                 "voxel_coords": voxel_coords_tensor,
                 "voxel_num_points": torch.from_numpy(data_dict["voxel_num_points"]).to(device),
             }
-            self.get_logger().debug("📦 Batch Dict ready")
             output_dicts, _ = voxelnext_model(batch_dict)
         return output_dicts
 
     def publish_markers(self, output_dicts, pub_detected_objects, pub_detected_class, class_names):
-        self.get_logger().info("📡 publishing /detected_3D_Box..")
+        # Check total number of detected objects
+        total_objects = sum(len(output["pred_boxes"]) for output in output_dicts)
+        if total_objects == 0:
+            self.get_logger().info("🚫 No objects detected")
+        else:
+            self.get_logger().info("Publishing detected_3D_Box...")
 
         box_markers  = MarkerArray()
         text_markers = MarkerArray()
@@ -196,7 +212,7 @@ class VoxelNeXt3DDetect(Node):
 
                 class_name = class_names[label - 1] # Adjust the class label index (assuming class indices start from 1)
                 color = color_map.get(class_name, default_color)
-                self.get_logger().info(f"🔍 Object {j+1},  Class: {class_name},  Score: {score:.2f},  Position: ({x_center:.2f}, {y_center:.2f}, {z_center:.2f})")
+                self.get_logger().info(f"✅ Object {j+1},  Class: {class_name},  Score: {score:.2f},  Position: ({x_center:.2f}, {y_center:.2f}, {z_center:.2f})")
 
 
                 # 1. Create Box marker 
@@ -222,9 +238,9 @@ class VoxelNeXt3DDetect(Node):
                 marker.pose.orientation.w = qw
 
                 marker.color.a = 0.5
-                marker.color.r = color[0]
-                marker.color.g = color[1]
-                marker.color.b = color[2]
+                marker.color.r = float(color[0])
+                marker.color.g = float(color[1])
+                marker.color.b = float(color[2])
                 marker.lifetime = Duration(sec=0, nanosec=200000000)
                 box_markers.markers.append(marker)
 
