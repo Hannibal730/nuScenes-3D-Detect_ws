@@ -10,7 +10,6 @@ install(
     PROGRAMS
     scripts/3D_object_detect.py
     scripts/center_object_detect.py
-    scripts/object_detect.py
     scripts/model.py
 
     DESTINATION lib/${PROJECT_NAME}
