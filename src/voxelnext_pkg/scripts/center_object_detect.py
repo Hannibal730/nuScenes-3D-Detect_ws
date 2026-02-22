@@ -135,6 +135,9 @@ class CenterObjectDetect(Node):
         self.get_logger().info("✅ Subscriber for '/velodyne_points' created")
         self.get_logger().info("🚀 Now everything is ready. Run the rosbag file or launch the Velodyne LiDAR")
 
+        # Filtering Class
+        self.target_classes = ['traffic_cone']
+
     def lidar_callback(self, msg):
         self.get_logger().info("-" * 23)
         self.get_logger().info("Receiving LiDAR data.")
@@ -215,6 +218,11 @@ class CenterObjectDetect(Node):
                 z_length = float(box[5])
 
                 class_name = class_names[label - 1] # Adjust class label index
+
+                # Filtering
+                if class_name not in self.target_classes:
+                    continue
+
                 color = color_map.get(class_name, default_color)
                 self.get_logger().info(f"✅ Object {j+1},  Class: {class_name},  Score: {score:.2f},  Position: ({x_center:.2f}, {y_center:.2f}, {z_center:.2f})")
 

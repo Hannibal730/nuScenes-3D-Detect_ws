@@ -132,6 +132,9 @@ class VoxelNeXt3DDetect(Node):
             1) # QoS profile 1 for compatibility with buff_size
         self.get_logger().info("✅ Subscriber for '/velodyne_points' created")
         self.get_logger().info("🚀 Now everything is ready. Run the rosbag file or launch the Velodyne LiDAR")
+        
+        # Filtering Class
+        self.target_classes = ['traffic_cone']
 
     def lidar_callback(self, msg):
         self.get_logger().info("-" * 23)
@@ -219,6 +222,11 @@ class VoxelNeXt3DDetect(Node):
                 qw = math.cos(heading / 2.0)
 
                 class_name = class_names[label - 1] # Adjust the class label index (assuming class indices start from 1)
+                
+                # Filtering
+                if class_name not in self.target_classes:
+                    continue
+
                 color = color_map.get(class_name, default_color)
                 self.get_logger().info(f"✅ Object {j+1},  Class: {class_name},  Score: {score:.2f},  Position: ({x_center:.2f}, {y_center:.2f}, {z_center:.2f})")
 
