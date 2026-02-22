@@ -197,12 +197,26 @@ class VoxelNeXt3DDetect(Node):
         box_markers  = MarkerArray()
         text_markers = MarkerArray()
 
+        # Optimization 1: Get timestamp once per frame (avoids system calls inside loop)
+        current_time = self.get_clock().now().to_msg()
+
+        # Optimization 2: Pre-calculate target label indices for vector filtering
+        target_indices = [class_names.index(c) + 1 for c in self.target_classes if c in class_names]
+
         for i, output in enumerate(output_dicts):
             # Optimization: Move tensors to CPU and convert to NumPy once before iterating
             # Calling .cpu().item() inside a loop causes severe GPU-CPU synchronization overhead.
             pred_boxes = output["pred_boxes"].cpu().numpy()
             pred_labels = output["pred_labels"].cpu().numpy()
             pred_scores = output["pred_scores"].cpu().numpy()
+
+            # Optimization 3: Vectorized filtering (NumPy)
+            # Filter out non-target classes BEFORE the loop to reduce Python iteration overhead
+            if len(target_indices) > 0:
+                mask = np.isin(pred_labels, target_indices)
+                pred_boxes = pred_boxes[mask]
+                pred_labels = pred_labels[mask]
+                pred_scores = pred_scores[mask]
 
             for j in range(len(pred_boxes)):
                 box = pred_boxes[j]
@@ -223,10 +237,6 @@ class VoxelNeXt3DDetect(Node):
 
                 class_name = class_names[label - 1] # Adjust the class label index (assuming class indices start from 1)
                 
-                # Filtering
-                if class_name not in self.target_classes:
-                    continue
-
                 color = color_map.get(class_name, default_color)
                 self.get_logger().info(f"✅ Object {j+1},  Class: {class_name},  Score: {score:.2f},  Position: ({x_center:.2f}, {y_center:.2f}, {z_center:.2f})")
 
@@ -234,7 +244,7 @@ class VoxelNeXt3DDetect(Node):
                 # 1. Create Box marker 
                 marker = Marker()
                 marker.header = Header()
-                marker.header.stamp = self.get_clock().now().to_msg()
+                marker.header.stamp = current_time
                 marker.header.frame_id = "velodyne"
                 marker.ns = "detected_3D_Box"
                 marker.id = i * 1000 + j
@@ -263,7 +273,7 @@ class VoxelNeXt3DDetect(Node):
 
                 # 2. # Create txt marker 
                 text = Marker()
-                text.header = Header(stamp=self.get_clock().now().to_msg(), frame_id="velodyne")
+                text.header = Header(stamp=current_time, frame_id="velodyne")
                 text.ns     = "detected_class"
                 text.id     = i * 1000 + j
                 text.type   = Marker.TEXT_VIEW_FACING
