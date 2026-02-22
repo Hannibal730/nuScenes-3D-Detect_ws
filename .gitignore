@@ -66,3 +66,12 @@ CATKIN_IGNORE
 
 
 # End of https://www.toptal.com/developers/gitignore/api/ros
+
+.venv/*
+.venv
+
+*.db3
+metadata.yaml
+
+*.tar.xz
+

@@ -1,21 +1,22 @@
-conda create -n vlp python=3.10  (ROS 2 Humble과 호환성이 가장 좋은 Python 버전)
+sudo apt update
+sudo apt install -y python3-venv python3-dev build-essential
+
+python3 -m venv .venv
+source .venv/bin/activate
 
 pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu118
 
-디버깅 python -c "import torch; print('CUDA Available:', torch.cuda.is_available())"
-
-
-
+디버깅
+python -c "import torch; print('CUDA Available:', torch.cuda.is_available())"
 
 
 pip install spconv-cu118 (사용자의 쿠다 환경에 맞춰서 설치. setup.py에서는 일부러 주석처리함.)
 
 export PYTHONNOUSERSITE=1 (가상환경이 아니라 ~/.local에 깔려 있던 다른 버전의 PyTorch가 아래의 빌드를 간섭하는 방지하고)
-pip install -e . --no-build-isolation  (torch-cu118을 사용하여 빌드하도록 강제하여 setup.py의 pcdet 라이브러리(CUDA 확장 모듈 iou3d_nms_cuda 등)를 설치)
-
-
-pip install -r requirements.txt (그 밖에 라이브러리도 가상환경에 설치)
 
 
 
+cd/src/voxelnext_pkg 한 다음에 pip install -e . --no-build-isolation  (torch-cu118을 사용하여 빌드하도록 강제하여 setup.py의 pcdet 라이브러리(CUDA 확장 모듈 iou3d_nms_cuda 등)를 설치)
 
+
+cd/src/voxelnext_pkg 한 다음에 pip install -r requirements.txt (이외의 라이브러리도 가상환경에 설치)
